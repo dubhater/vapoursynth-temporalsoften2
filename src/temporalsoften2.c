@@ -467,9 +467,7 @@ temporalSoftenCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core,
     d.threshold[2] = d.threshold[1];
 
     d.scenechange = vsapi->propGetInt(in, "scenechange", 0, &err);
-    if (err) {
-        d.scenechange = 1;
-    }
+
     d.mode = vsapi->propGetInt(in, "mode", 0, &err);
     if (err) {
         d.mode = 2;
@@ -494,6 +492,8 @@ temporalSoftenCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core,
     FAIL_IF_ERROR(d.threshold[0] == 0 && d.threshold[1] == 0,
                   "luma_threshold and chroma_threshold can't both be 0");
 
+    FAIL_IF_ERROR(d.scenechange < 0 || d.scenechange > 254, "scenechange must be between 0 and 254 (inclusive)")
+
     FAIL_IF_ERROR(d.mode != 2, "mode must be 2. mode 1 is not implemented");
 
     switch (bshift) {
@@ -507,6 +507,29 @@ temporalSoftenCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core,
     default:
         d.proc = mode2_16bit_sse2;
     }
+
+
+    if (d.scenechange && d.vi->format->colorFamily != cmRGB) {
+        VSPlugin *misc_plugin = vsapi->getPluginById("com.vapoursynth.misc", core);
+        FAIL_IF_ERROR(misc_plugin == NULL, "Miscellaneous Filters plugin is required");
+
+        VSMap *args = vsapi->createMap();
+        vsapi->propSetNode(args, "clip", d.node, paReplace);
+        vsapi->freeNode(d.node);
+        d.node = NULL;
+        vsapi->propSetFloat(args, "threshold", d.scenechange / 255.0, paReplace);
+
+        VSMap *ret = vsapi->invoke(misc_plugin, "SCDetect", args);
+        vsapi->freeMap(args);
+        if (vsapi->getError(ret)) {
+            snprintf(msg, 235, vsapi->getError(ret));
+            vsapi->freeMap(ret);
+            goto fail;
+        }
+        d.node = vsapi->propGetNode(ret, "clip", 0, NULL);
+        vsapi->freeMap(ret);
+    }
+
 
     TemporalSoftenData *data = (TemporalSoftenData *)malloc(sizeof(d));
     *data = d;
