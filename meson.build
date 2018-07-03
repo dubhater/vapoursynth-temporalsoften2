@@ -12,6 +12,7 @@ warnings = [
 
 cflags = [
   warnings,
+  '-DTEMPORALSOFTEN2_VERSION="@0@"'.format(meson.project_version()),
 ]
 
 ldflags = [

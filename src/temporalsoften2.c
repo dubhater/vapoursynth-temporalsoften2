@@ -16,7 +16,6 @@
 #define TS_FUNC_ALIGN __attribute__((force_align_arg_pointer))
 #endif
 
-#define TEMPORALSOFTEN2_VERSION "0.1.1"
 
 typedef struct {
     VSNodeRef *node;
