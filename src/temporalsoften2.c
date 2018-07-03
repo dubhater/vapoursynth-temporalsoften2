@@ -285,6 +285,10 @@ static void VS_CC
 temporalSoftenInit(VSMap *in, VSMap *out, void **instanceData, VSNode *node,
                    VSCore *core, const VSAPI *vsapi)
 {
+    (void)in;
+    (void)out;
+    (void)core;
+
     TemporalSoftenData *d = (TemporalSoftenData *)*instanceData;
     vsapi->setVideoInfo(d->vi, 1, node);
 }
@@ -311,6 +315,8 @@ temporalSoftenGetFrame(int n, int activationReason, void **instanceData,
                        void **frameData, VSFrameContext *frameCtx, VSCore *core,
                        const VSAPI *vsapi)
 {
+    (void)frameData;
+
     TemporalSoftenData *d = (TemporalSoftenData *)*instanceData;
     n = min(max(n, 0), d->vi->numFrames - 1);
     int first = max(n - d->radius, 0);
@@ -399,6 +405,8 @@ temporalSoftenGetFrame(int n, int activationReason, void **instanceData,
 static void VS_CC
 temporalSoftenFree(void *instanceData, VSCore *core, const VSAPI *vsapi)
 {
+    (void)core;
+
     TemporalSoftenData *d = (TemporalSoftenData *)instanceData;
     vsapi->freeNode(d->node);
     free(d);
@@ -415,6 +423,8 @@ temporalSoftenFree(void *instanceData, VSCore *core, const VSAPI *vsapi)
 static void VS_CC
 temporalSoftenCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core,
                      const VSAPI *vsapi) {
+    (void)userData;
+
     TemporalSoftenData d = { 0 };
     int err;
     char msg_buff[256] = "TemporalSoften2: ";
