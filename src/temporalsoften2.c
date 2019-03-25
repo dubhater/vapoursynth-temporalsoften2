@@ -522,7 +522,7 @@ temporalSoftenCreate(const VSMap *in, VSMap *out, void *userData, VSCore *core,
         VSMap *ret = vsapi->invoke(misc_plugin, "SCDetect", args);
         vsapi->freeMap(args);
         if (vsapi->getError(ret)) {
-            snprintf(msg, 235, vsapi->getError(ret));
+            snprintf(msg, 235, "%s", vsapi->getError(ret));
             vsapi->freeMap(ret);
             goto fail;
         }
